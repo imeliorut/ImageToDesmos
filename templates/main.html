@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to Desmos generator</title>
+    <link rel="icon" type="image/x-icon" href="/static/images/icon.ico">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fc;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+
+        .drop-area {
+            border: 2px dashed #2980b9;
+            padding: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-sizing: border-box;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .drop-area::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            bottom: -2px;
+            left: -2px;
+            border: 2px dashed #2980b9;
+            border-radius: 5px;
+            z-index: -1;
+        }
+
+        .drop-area.highlight {
+            background-color: #e9f5fe;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .generate-button {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .generate-button:hover {
+            background-color: #2980b9;
+        }
+
+        .menu-button {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            z-index: 1;
+        }
+
+        .menu-button:hover {
+            background-color: #2980b9;
+        }
+
+        .selected-file {
+            margin-top: 10px;
+            font-weight: bold;
+            display: none;
+            width: 100%;
+            box-sizing: border-box;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            flex-shrink: 0;
+            resize: none;
+        }
+
+        .remove-file {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            color: #e74c3c;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+.custom-option {
+    position: relative;
+    padding-left: 30px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    user-select: none;
+}
+
+.custom-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.custom-option label {
+    position: relative;
+    padding-left: 25px;
+        display: flex; /* Added */
+    align-items: left; /* Added */
+}
+
+.custom-option label::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    height: 12px;
+    width: 12px;
+    border-radius: 50%;
+    border: 2px solid #3498db;
+    background-color: transparent;
+    transition: background-color 0.3s ease;
+}
+
+.custom-option input[type="radio"]:checked + label::before {
+    background-color: #3498db;
+}
+
+.custom-option label:hover::before {
+    background-color: #e9f5fe;
+}
+.form {
+    width: 100%;
+    max-width: 400px;
+}
+body, html {
+  overflow: hidden;
+}
+
+
+    </style>
+</head>
+<body>
+    <h1>Image to Desmos generator</h1>
+
+    <form id="imageForm" enctype="multipart/form-data" action="/desmos" method="POST" onsubmit="return validateForm()" class="form">
+        <div class="container">
+            <div class="drop-area" id="dropArea">
+                <label for="imageInput" id="dropText">Drag and drop your image here or click to select.</label>
+                <input type="file" id="imageInput" name="file" class="file-input" accept="image/*" onchange="showFileName(event)">
+                <div class="selected-file" id="selectedFile"></div>
+                <div class="remove-file" id="removeFile" onclick="removeFile(event)" style="display: none;">&#10006;</div>
+            </div>
+        </div>
+
+        <h3>Options:</h3>
+    <div class="custom-options" id="options">
+        <div class="custom-option">
+            <input type="radio" name="options" value="bezier" id="option-bezier" checked>
+            <label for="option-bezier">Bezier curves</label>
+        </div>
+        <div class="custom-option">
+            <input type="radio" name="options" value="conic" id="option-conic">
+            <label for="option-conic">Conic sections</label>
+        </div>
+    </div>
+
+
+        <input type="submit" class="generate-button" value="Generate">
+    </form>
+
+    <br>
+
+    <div class="container">
+        <h2>Information</h2>
+        <p>Transform images into Desmos formulas - an innovative research project harnessing image recognition technology. Please utilize responsibly, avoiding any misuse for academic dishonesty.</p>
+    </div>
+
+    <button class="menu-button" onclick="goToHome()">Main Menu</button>
+
+    <script>
+        function goToHome() {
+            window.location.href = "/";
+        }
+
+        function handleDragOver(evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+            evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy operation
+        }
+
+        function handleFileSelect(evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+
+            var files = evt.dataTransfer.files; // FileList object.
+
+            // Process the file here. You can access the file using files[0].
+            console.log(files[0]);
+            displayFileName(files[0].name);
+        }
+
+        function showFileName(evt) {
+            var file = evt.target.files[0];
+            displayFileName(file.name);
+        }
+
+        function validateForm() {
+            var fileInput = document.getElementById("imageInput");
+            var file = fileInput.files[0];
+
+            if (!file) {
+                alert("Please select a file.");
+                return false;
+            }
+
+            var allowedFormats = ["image/png", "image/jpg", "image/jpeg"];
+            if (!allowedFormats.includes(file.type)) {
+                alert("Please select a valid image file (PNG, JPG, JPEG).");
+                return false;
+            }
+
+            displayFileName(file.name);
+            return true;
+        }
+
+<!--        function initialize() {-->
+<!--            adjustWidth();-->
+<!--            window.addEventListener('resize', adjustWidth);-->
+<!--        }-->
+
+<!--        window.onload = initialize;-->
+
+function displayFileName(fileName) {
+    var dropTextElement = document.getElementById("dropText");
+    var selectedFileElement = document.getElementById("selectedFile");
+    var removeFileElement = document.getElementById("removeFile");
+    var fileInputElement = document.getElementById("imageInput");
+
+    dropTextElement.style.display = "none";
+    selectedFileElement.textContent = fileName;
+    selectedFileElement.style.display = "block";
+    removeFileElement.style.display = "inline-block";
+
+    // Adjust the container width based on the selected file name
+    var container = document.querySelector('.container');
+    var containerWidth = container.offsetWidth;
+    fileInputElement.style.width = containerWidth + 'px';
+}
+
+
+        function removeFile(evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+
+            var dropTextElement = document.getElementById("dropText");
+            var selectedFileElement = document.getElementById("selectedFile");
+            var removeFileElement = document.getElementById("removeFile");
+            var fileInputElement = document.getElementById("imageInput");
+
+            dropTextElement.style.display = "block";
+            selectedFileElement.textContent = "";
+            selectedFileElement.style.display = "none";
+            removeFileElement.style.display = "none";
+            fileInputElement.value = "";
+        }
+    </script>
+</body>
+</html>
