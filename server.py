@@ -35,6 +35,6 @@ def allowed_file(filename):
 
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-app.run(host='0.0.0.0', port=80)
+app.run(host='0.0.0.0', port=5000)
 
 # TODO: Add conic equations
